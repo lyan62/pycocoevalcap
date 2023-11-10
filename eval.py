@@ -9,13 +9,14 @@ from .clipscore.clipscore import ClipScore
 
 
 class COCOEvalCap:
-    def __init__(self, coco, cocoRes):
+    def __init__(self, coco, cocoRes, metrics=['B', 'M', 'R', 'C', 'S', "CS"]):
         self.evalImgs = []
         self.eval = {}
         self.imgToEval = {}
         self.coco = coco
         self.cocoRes = cocoRes
         self.params = {'image_id': coco.getImgIds()}
+        self.metrics = metrics
 
     def evaluate(self):
         imgIds = self.params['image_id']
@@ -38,14 +39,28 @@ class COCOEvalCap:
         # Set up scorers
         # =================================================
         print('setting up scorers...')
-        scorers = [
-            (Bleu(4), ["Bleu_1", "Bleu_2", "Bleu_3", "Bleu_4"]),
-            (Meteor(),"METEOR"),
-            (Rouge(), "ROUGE_L"),
-            (Cider(), "CIDEr"),
-            (Spice(), "SPICE"),
-            (ClipScore(), ["CLIPScore", "RefCLIPScore"])
-        ]
+        scores = []
+        if 'B' in self.metrics:
+            scores.append((Bleu(4), ["Bleu_1", "Bleu_2", "Bleu_3", "Bleu_4"]))
+        if 'M' in self.metrics:
+            scores.append((Meteor(),"METEOR"))
+        if 'R' in self.metrics:
+            scores.append((Rouge(), "ROUGE_L"))
+        if 'C' in self.metrics:
+            scores.append((Cider(), "CIDEr"))
+        if 'S' in self.metrics:
+            scores.append((Spice(), "SPICE"))
+        if 'CS' in self.metrics:
+            scores.append((ClipScore(), ["CLIPScore", "RefCLIPScore"]))
+                
+        # scorers = [
+        #     (Bleu(4), ["Bleu_1", "Bleu_2", "Bleu_3", "Bleu_4"]),
+        #     (Meteor(),"METEOR"),
+        #     (Rouge(), "ROUGE_L"),
+        #     (Cider(), "CIDEr"),
+        #     (Spice(), "SPICE"),
+        #     (ClipScore(), ["CLIPScore", "RefCLIPScore"])
+        # ]
 
         # =================================================
         # Compute scores
